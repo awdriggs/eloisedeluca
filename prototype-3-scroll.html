@@ -241,30 +241,29 @@
           speed *= 0.96;
           if (speed < baseSpeed + 0.1) speed = baseSpeed;
         }
-        // Reset when first set scrolls out
+        // Wrap around in both directions
         const halfHeight = track.scrollHeight / 2;
-        if (Math.abs(scrollY) >= halfHeight) {
+        if (scrollY <= -halfHeight) {
           scrollY += halfHeight;
+        } else if (scrollY > 0) {
+          scrollY -= halfHeight;
         }
         track.style.transform = `translateX(-50%) translateY(${scrollY}px)`;
       }
       animId = requestAnimationFrame(animate);
     }
 
-    // Boost speed on scroll
+    // Scroll to move through projects (desktop)
     document.addEventListener('wheel', (e) => {
-      if (!paused) {
-        speed = Math.min(speed + Math.abs(e.deltaY) * 0.05, 15);
-      }
-    });
+      e.preventDefault();
+      scrollY -= e.deltaY * 0.5;
+    }, { passive: false });
 
     // Start with some top padding
     scrollY = -80;
     animate();
 
     // Pause on hover (desktop)
-    const thumbs = document.querySelectorAll('.thumb');
-
     track.addEventListener('mouseenter', () => {
       paused = true;
       pausedIndicator.classList.add('show');
@@ -274,15 +273,30 @@
       pausedIndicator.classList.remove('show');
     });
 
-    // Pause on touch outside thumbs (mobile)
-    let touchPaused = false;
+    // Touch: hold to pause, drag to scroll (mobile)
+    let touchStartY = 0;
+    let touchHeld = false;
+
     document.addEventListener('touchstart', (e) => {
-      // If touching whitespace (not a thumb)
-      if (!e.target.closest('.thumb') && !e.target.closest('.modal-overlay') && !e.target.closest('header')) {
-        touchPaused = !touchPaused;
-        paused = touchPaused;
-        pausedIndicator.classList.toggle('show', touchPaused);
-      }
+      if (e.target.closest('.modal-overlay') || e.target.closest('header')) return;
+      touchStartY = e.touches[0].clientY;
+      touchHeld = true;
+      paused = true;
+      pausedIndicator.classList.add('show');
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!touchHeld) return;
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+      scrollY -= deltaY;
+      touchStartY = touchY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      touchHeld = false;
+      paused = false;
+      pausedIndicator.classList.remove('show');
     });
 
     // Modal
@@ -304,7 +318,8 @@
     function closeModal() {
       document.getElementById('modalImage').innerHTML = '';
       modal.classList.remove('open');
-      paused = touchPaused; // restore previous pause state
+      paused = false;
+      pausedIndicator.classList.remove('show');
     }
 
     modalClose.addEventListener('click', closeModal);
