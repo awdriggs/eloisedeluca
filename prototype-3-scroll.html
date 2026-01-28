@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eloise Deluca - Prototype 3</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.5rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+      pointer-events: none;
+    }
+    header * { pointer-events: auto; }
+    .name {
+      font-size: 1.3rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 300;
+    }
+    header nav a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-left: 1.5rem;
+      transition: color 0.3s;
+    }
+    header nav a:hover { color: #fff; }
+
+    /* Scroll column */
+    .scroll-track {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30%;
+      top: 0;
+    }
+
+    .thumb {
+      width: 100%;
+      margin-bottom: 0;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    .thumb:hover { transform: scale(1.02); }
+
+    .thumb-inner {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .thumb-title {
+      position: absolute;
+      bottom: 0.8rem;
+      left: 0.8rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .thumb:hover .thumb-title { opacity: 1; }
+
+    /* Paused indicator */
+    .paused-indicator {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .paused-indicator.show { opacity: 1; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-content {
+      width: 70%;
+      max-width: 800px;
+      cursor: default;
+    }
+    .modal-image {
+      width: 100%;
+      max-height: 70vh;
+      margin-bottom: 1.5rem;
+    }
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .modal-desc {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.6;
+    }
+    .modal-close {
+      position: fixed;
+      top: 1.5rem;
+      right: 2rem;
+      font-size: 1.5rem;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      z-index: 210;
+      transition: color 0.3s;
+    }
+    .modal-close:hover { color: #fff; }
+
+    @media (max-width: 600px) {
+      .scroll-track { width: 70%; }
+      header { padding: 1rem; }
+      .name { font-size: 1rem; }
+      header nav a { font-size: 0.65rem; margin-left: 1rem; }
+      .modal-content { width: 90%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="name">Eloise Deluca</div>
+    <nav>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
+  <div class="scroll-track" id="track"></div>
+
+  <div class="paused-indicator" id="pausedIndicator">paused</div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal-close" id="modalClose">&times;</div>
+    <div class="modal-content">
+      <div class="modal-image" id="modalImage"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+    </div>
+  </div>
+
+  <script>
+    const track = document.getElementById('track');
+    const pausedIndicator = document.getElementById('pausedIndicator');
+    const modal = document.getElementById('modal');
+    const modalClose = document.getElementById('modalClose');
+
+    // Project data
+    const projects = [
+      { title: 'Dance', category: 'Dance', type: 'video', src: 'mov/dance_hero.mp4', desc: '' },
+      { title: 'An Ode To', category: 'Photography', type: 'image', src: 'stills/An Ode To.JPG', desc: '' },
+      { title: 'Boucheron', category: 'Direction', type: 'image', src: 'stills/Boucheron 8.jpg', desc: '' },
+      { title: 'Direction', category: 'Direction', type: 'video', src: 'mov/direction_hero.mp4', desc: '' },
+      { title: 'Burlesque', category: 'Dance', type: 'image', src: 'stills/Burlesque SVstudios.JPG', desc: '' },
+      { title: 'Editorial', category: 'Photography', type: 'image', src: 'stills/Editorial.JPG', desc: '' },
+      { title: 'Choreography', category: 'Choreography', type: 'video', src: 'mov/choreography_hero.mp4', desc: '' },
+      { title: 'Headshot', category: 'Photography', type: 'image', src: 'stills/Headshot.JPG', desc: '' },
+      { title: 'Hermes', category: 'Direction', type: 'image', src: 'stills/Hermes Andrea Miller.JPG', desc: '' },
+      { title: 'Loni Warehouse', category: 'Dance', type: 'image', src: 'stills/Loni warehouse.jpg', desc: '' },
+      { title: 'Movement at a Still Point', category: 'Choreography', type: 'image', src: 'stills/Movement at a still point.jpg', desc: '' },
+      { title: 'Performa', category: 'Dance', type: 'image', src: 'stills/Performa Cecelia Bengolea.JPG', desc: '' },
+    ];
+
+    // Build thumbs - duplicate for seamless loop
+    function createThumb(proj, index) {
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      if (proj.type === 'video') {
+        thumb.innerHTML = `
+          <video class="thumb-inner" autoplay muted loop playsinline>
+            <source src="${proj.src}" type="video/mp4">
+          </video>
+          <div class="thumb-title">${proj.title}</div>
+        `;
+      } else {
+        thumb.innerHTML = `
+          <img class="thumb-inner" src="${proj.src}" alt="${proj.title}">
+          <div class="thumb-title">${proj.title}</div>
+        `;
+      }
+      thumb.addEventListener('click', () => openModal(proj));
+      return thumb;
+    }
+
+    // Create two sets for seamless looping
+    const allProjects = [...projects, ...projects];
+    allProjects.forEach((proj, i) => {
+      track.appendChild(createThumb(proj, i));
+    });
+
+    // Scroll animation
+    let scrollY = 0;
+    const baseSpeed = 1;
+    let speed = baseSpeed;
+    let paused = false;
+    let animId;
+
+    function animate() {
+      if (!paused) {
+        scrollY -= speed;
+        // Decay speed back to base
+        if (speed > baseSpeed) {
+          speed *= 0.96;
+          if (speed < baseSpeed + 0.1) speed = baseSpeed;
+        }
+        // Reset when first set scrolls out
+        const halfHeight = track.scrollHeight / 2;
+        if (Math.abs(scrollY) >= halfHeight) {
+          scrollY += halfHeight;
+        }
+        track.style.transform = `translateX(-50%) translateY(${scrollY}px)`;
+      }
+      animId = requestAnimationFrame(animate);
+    }
+
+    // Boost speed on scroll
+    document.addEventListener('wheel', (e) => {
+      if (!paused) {
+        speed = Math.min(speed + Math.abs(e.deltaY) * 0.05, 15);
+      }
+    });
+
+    // Start with some top padding
+    scrollY = -80;
+    animate();
+
+    // Pause on hover (desktop)
+    const thumbs = document.querySelectorAll('.thumb');
+
+    track.addEventListener('mouseenter', () => {
+      paused = true;
+      pausedIndicator.classList.add('show');
+    });
+    track.addEventListener('mouseleave', () => {
+      paused = false;
+      pausedIndicator.classList.remove('show');
+    });
+
+    // Pause on touch outside thumbs (mobile)
+    let touchPaused = false;
+    document.addEventListener('touchstart', (e) => {
+      // If touching whitespace (not a thumb)
+      if (!e.target.closest('.thumb') && !e.target.closest('.modal-overlay') && !e.target.closest('header')) {
+        touchPaused = !touchPaused;
+        paused = touchPaused;
+        pausedIndicator.classList.toggle('show', touchPaused);
+      }
+    });
+
+    // Modal
+    function openModal(proj) {
+      const modalImage = document.getElementById('modalImage');
+      if (proj.type === 'video') {
+        modalImage.innerHTML = `<video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:contain;">
+          <source src="${proj.src}" type="video/mp4">
+        </video>`;
+      } else {
+        modalImage.innerHTML = `<img src="${proj.src}" alt="${proj.title}" style="width:100%;height:100%;object-fit:contain;">`;
+      }
+      document.getElementById('modalTitle').textContent = proj.title;
+      document.getElementById('modalDesc').textContent = proj.desc;
+      modal.classList.add('open');
+      paused = true;
+    }
+
+    function closeModal() {
+      document.getElementById('modalImage').innerHTML = '';
+      modal.classList.remove('open');
+      paused = touchPaused; // restore previous pause state
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>

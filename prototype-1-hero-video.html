@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eloise Deluca - Prototype 1</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #0a0a0a; color: #fff; overflow: hidden; height: 100vh; }
+
+    .container { position: relative; width: 100%; height: 100vh; }
+
+    /* Hero video */
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Left nav */
+    nav {
+      position: absolute;
+      left: 1.5rem;
+      bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+    nav a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.7rem 1.5rem;
+      margin: 0;
+      transition: all 0.3s ease;
+    }
+    nav a:nth-child(1) { background: #e63946; }
+    nav a:nth-child(2) { background: #f77f00; }
+    nav a:nth-child(3) { background: #2ec4b6; }
+    nav a:nth-child(4) { background: #9b5de5; }
+    nav a:nth-child(5) { background: #f15bb5; }
+    nav a:nth-child(6) { background: #00bbf9; }
+    nav a:hover {
+      filter: brightness(1.2);
+      padding-left: 2rem;
+    }
+
+    /* Name */
+    .name {
+      position: absolute;
+      top: 2rem;
+      right: 2.5rem;
+      font-size: 1.4rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      z-index: 10;
+      font-weight: 300;
+    }
+
+    @media (max-width: 600px) {
+      nav a { font-size: 0.85rem; padding: 0.6rem 1rem; }
+      .name { font-size: 1rem; top: 1rem; right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="mov/sizzle.mp4" type="video/mp4">
+    </video>
+
+    <div class="name">Eloise Deluca</div>
+
+    <nav>
+      <a href="#">Choreography</a>
+      <a href="#">Dance</a>
+      <a href="#">Direction</a>
+      <a href="#">About</a>
+      <a href="#">CV</a>
+      <a href="#">Contact</a>
+    </nav>
+  </div>
+</body>
+</html>

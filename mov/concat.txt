@@ -1,0 +1,3 @@
+file 'choreography_hero.mp4'
+file 'dance_hero.mp4'
+file 'direction_hero.mp4'

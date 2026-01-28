@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eloise Deluca - Prototype 2</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #0a0a0a; color: #fff; overflow: hidden; height: 100vh; }
+
+    .carousel {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      cursor: pointer;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide.active { opacity: 1; }
+
+    .slide video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Name */
+    .name {
+      position: absolute;
+      top: 2rem;
+      left: 2.5rem;
+      font-size: 1.4rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      z-index: 20;
+      font-weight: 300;
+    }
+
+    /* Category label at bottom */
+    .category-label {
+      position: absolute;
+      bottom: 3rem;
+      left: 0;
+      right: 0;
+      text-align: center;
+      z-index: 20;
+    }
+    .category-label span {
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .category-label span.active { opacity: 1; }
+
+    /* Swipe hint */
+    .hint {
+      position: absolute;
+      bottom: 5.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      z-index: 20;
+    }
+
+    @media (max-width: 600px) {
+      .name { font-size: 1rem; top: 1.2rem; left: 1.2rem; }
+      .category-label span { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="carousel" id="carousel">
+    <div class="slide active" data-category="dance">
+      <video autoplay muted loop playsinline>
+        <source src="mov/dance_hero.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="slide" data-category="direction">
+      <video autoplay muted loop playsinline>
+        <source src="mov/direction_hero.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="slide" data-category="choreography">
+      <video autoplay muted loop playsinline>
+        <source src="mov/choreography_hero.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="name">Eloise Deluca</div>
+
+    <div class="category-label">
+      <span class="active" data-for="dance">Dance</span>
+      <span data-for="direction">Direction</span>
+      <span data-for="choreography">Choreography</span>
+    </div>
+
+    <div class="hint">scroll or swipe</div>
+
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const labels = document.querySelectorAll('.category-label span');
+    let current = 0;
+    let autoTimer;
+
+    function goTo(index) {
+      slides[current].classList.remove('active');
+      labels[current].classList.remove('active');
+      current = (index + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      labels[current].classList.add('active');
+      resetAuto();
+    }
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    function resetAuto() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(next, 4000);
+    }
+    resetAuto();
+
+    // Scroll to change
+    let scrollCooldown = false;
+    document.addEventListener('wheel', (e) => {
+      if (scrollCooldown) return;
+      scrollCooldown = true;
+      if (e.deltaY > 0) next(); else prev();
+      setTimeout(() => scrollCooldown = false, 800);
+    });
+
+    // Touch / swipe
+    let touchStartX = 0;
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    });
+    document.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) next(); else prev();
+      }
+    });
+
+    // Click to navigate
+    slides.forEach(slide => {
+      slide.addEventListener('click', () => {
+        const cat = slide.dataset.category;
+        alert(`Navigate to: ${cat} page\n(placeholder - would go to /${cat})`);
+      });
+    });
+
+  </script>
+</body>
+</html>
