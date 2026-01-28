@@ -67,24 +67,10 @@
     }
     .category-label span.active { opacity: 1; }
 
-    /* Swipe hint */
-    .hint {
-      position: absolute;
-      bottom: 5.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.25);
-      z-index: 20;
-    }
-
     @media (max-width: 600px) {
       .name { font-size: 1rem; top: 1.2rem; left: 1.2rem; }
-      .category-label { bottom: 6rem; }
+      .category-label { bottom: 8rem; }
       .category-label span { font-size: 1.5rem; }
-      .hint { bottom: 8.5rem; }
     }
   </style>
 </head>
@@ -113,8 +99,6 @@
       <span data-for="direction">Direction</span>
       <span data-for="choreography">Choreography</span>
     </div>
-
-    <div class="hint">scroll or swipe</div>
 
   </div>
 
@@ -169,11 +153,9 @@
     // Click to navigate
     slides.forEach(slide => {
       slide.addEventListener('click', () => {
-        const cat = slide.dataset.category;
-        alert(`Navigate to: ${cat} page\n(placeholder - would go to /${cat})`);
+        window.location.href = '#';
       });
     });
-
   </script>
 </body>
 </html>
